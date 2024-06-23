@@ -1,0 +1,5 @@
+{
+    "watch": "render_art/",
+    "ext": "py",
+    "exec": "clear && poetry run python -m render_art"
+}
