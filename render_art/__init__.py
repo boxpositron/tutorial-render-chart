@@ -1,71 +1,83 @@
 import secrets
 from typing import List, Optional
 
-
 PLOT_X = 8
 PLOT_Y = 8
 
 SCALE_X = 8
-SCALE_Y = 3
+SCALE_Y = 4
 
 
 # Array 0 -> y, Array 1 -> x
-Point = List[int]
-PlotTable = List[Point]
+Point = int
+Cordinate = List[Point]
+PlotTable = List[Cordinate]
 
 
-def render_x_axis(point: Optional[Point] = None) -> None:
+def render_x_axis(coordinates: Optional[Cordinate] = None, is_base: bool = False) -> None:
     # Plot x axis
 
-    normalized_plot_x = (PLOT_X + 1) * SCALE_X
-    if point is None:
+    x_point = coordinates[1] if coordinates is not None else -1
+    y_point = coordinates[0] if coordinates is not None else -1
 
-        for i in range(normalized_plot_x):
-            if i % SCALE_X == 0:
-                index = i // SCALE_X
-                print(index, end="")
-            else:
-                print("-", end="")
-
-        return
+    rendered_point = f"⏺ ({x_point},{y_point})"
+    total_rendered_characters = len(rendered_point) - 1
 
     for i in range(PLOT_X):
         # Lets scale according to the x axis
+        is_rendered_on_base_line: bool = i == x_point and y_point == 0
         for j in range(SCALE_X):
             if j != 0:
-                print(" ", end="")
+                if is_base:
+                    if not is_rendered_on_base_line:
+                        print("-", end="")
+                    else:
+                        # WARN: This renders on additional filler character on the x axis
+                        # It looks nicer this way. But it is not accurate
+                        # TODO: Factor for character rendering when deciding replacements
+                        # for the fill character
+                        should_render = j >= total_rendered_characters
+
+                        if should_render:
+                            print("-", end="")
+                else:
+                    print(" ", end="")
                 continue
 
-            if i == point[1]:
-                print(f"⏺ ({point[0]},{point[1]})", end="")
+            if i == x_point:
+                print(rendered_point, end="")
+
             else:
-                print(" ", end="")
+                if is_base:
+                    print(i, end="")
+                else:
+                    print(" ", end="")
 
 
-def render_y_axis(point: Point, index: int) -> None:
+def render_y_axis(coordinates: Cordinate) -> None:
+
+    y_point = coordinates[0]
 
     for item in range(SCALE_Y):
         if (item != 0):
             print("|")
             continue
 
-        print(index, end="")
-        for point in point:
-            render_x_axis(point)
-        print("")
-
-    if index == 1:
-        render_x_axis()
+        print(y_point, end="")
+        if y_point == 0:
+            print(",", end="")
+        render_x_axis(coordinates, is_base=y_point == 0)
+        print("", end="\n")
 
 
 def render_plotable_points(plot_table: PlotTable) -> None:
     # Plot y axis
 
-    for i in range(PLOT_Y, 0, -1):
+    for point in range(PLOT_Y, 0, -1):
 
-        selected_row = list(filter(lambda x: x[0] == i, plot_table))
+        coordinates = plot_table[point - 1]
 
-        render_y_axis(selected_row, i)
+        render_y_axis(coordinates)
 
 
 def safe_plotable_point(max: int) -> int:
@@ -80,8 +92,8 @@ def generate_plotable_points() -> PlotTable:
         for j in range(PLOT_X):
             should_plot = secrets.randbelow(2)
             if should_plot:
-                point = safe_plotable_point(PLOT_X)
-                item = [i, point]
+                cordinates = safe_plotable_point(PLOT_X)
+                item = [i, cordinates]
                 plot_table.append(item)
 
                 has_plot = True
@@ -89,8 +101,8 @@ def generate_plotable_points() -> PlotTable:
 
             if j == PLOT_X - 1 and not has_plot:
                 # If there is no plot in the row, add a plot
-                point = safe_plotable_point(PLOT_X)
-                item = [i, point]
+                cordinates = safe_plotable_point(PLOT_X)
+                item = [i, cordinates]
                 plot_table.append(item)
 
         has_plot = False
@@ -99,5 +111,5 @@ def generate_plotable_points() -> PlotTable:
 
 
 def main() -> None:
-    point = generate_plotable_points()
-    render_plotable_points(point)
+    cordinates = generate_plotable_points()
+    render_plotable_points(cordinates)
