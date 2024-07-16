@@ -7,6 +7,7 @@ PLOT_Y = 8
 SCALE_X = 8
 SCALE_Y = 4
 
+RENDER_CHARACTER = "⏺"
 
 # Array 0 -> y, Array 1 -> x
 Point = int
@@ -20,7 +21,7 @@ def render_x_axis(coordinates: Optional[Cordinate] = None, is_base: bool = False
     x_point = coordinates[1] if coordinates is not None else -1
     y_point = coordinates[0] if coordinates is not None else -1
 
-    rendered_point = f"⏺ ({x_point},{y_point})"
+    rendered_point = f"{RENDER_CHARACTER}({x_point},{y_point})"
     total_rendered_characters = len(rendered_point) - 1
 
     for i in range(PLOT_X):
@@ -32,11 +33,9 @@ def render_x_axis(coordinates: Optional[Cordinate] = None, is_base: bool = False
                     if not is_rendered_on_base_line:
                         print("-", end="")
                     else:
-                        # WARN: This renders on additional filler character on the x axis
-                        # It looks nicer this way. But it is not accurate
                         # TODO: Factor for character rendering when deciding replacements
                         # for the fill character
-                        should_render = j >= total_rendered_characters
+                        should_render = j > total_rendered_characters
 
                         if should_render:
                             print("-", end="")
@@ -113,3 +112,7 @@ def generate_plotable_points() -> PlotTable:
 def main() -> None:
     cordinates = generate_plotable_points()
     render_plotable_points(cordinates)
+
+
+if __name__ == "__main__":
+    main()
